@@ -6,7 +6,7 @@ export interface User {
   email: string
   password: string
   verificationCode: string
-  verificationCodeExpirt: Date
+  verificationCodeExpiry: Date
   isVerified: boolean
   isAcceptingMessage: boolean
   messages: Message[]
@@ -36,12 +36,12 @@ const userSchema = new mongoose.Schema<User>(
       type: String,
       required: [true, 'Verification Code is Required']
     },
-    verificationCodeExpirt: {
+    verificationCodeExpiry: {
       type: Date
     },
     isVerified: {
       type: Boolean,
-      default: true
+      default: false
     },
     isAcceptingMessage: {
       type: Boolean,
@@ -60,4 +60,5 @@ const userSchema = new mongoose.Schema<User>(
 )
 
 export const UserModel =
-  mongoose.models.User || mongoose.model<User>('User', userSchema)
+  (mongoose.models.User as mongoose.Model<User>) ||
+  mongoose.model<User>('User', userSchema)

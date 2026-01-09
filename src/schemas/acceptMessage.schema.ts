@@ -1,5 +1,5 @@
 import { z } from 'zod'
 
-export const signinSchima = z.object({
+export const acceptsMessageSchima = z.object({
   isAcceptingMessage: z.boolean()
 })

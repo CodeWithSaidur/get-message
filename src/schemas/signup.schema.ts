@@ -20,5 +20,3 @@ export const signupSchema = z.object({
       'Password must contain uppercase, lowercase, and number'
     )
 })
-
-export type SignupInput = z.infer<typeof signupSchema>

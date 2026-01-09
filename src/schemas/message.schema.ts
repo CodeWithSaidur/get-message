@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const signinSchima = z.object({
+export const messageSchima = z.object({
   message: z
     .string()
     .min(10, { message: 'Message must be atlist 10 Charrecter' })
