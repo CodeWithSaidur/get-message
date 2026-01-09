@@ -7,7 +7,7 @@ export interface User {
   password: string
   verificationCode: string
   verificationCodeExpiry: Date
-  isVerified: boolean
+  isVerified: boolean | string
   isAcceptingMessage: boolean
   messages: Message[]
 }
