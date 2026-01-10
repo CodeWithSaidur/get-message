@@ -6,3 +6,4 @@
 > tailwindcss   04.0
 > eslint        09.0
 > resend        06.7
+> NextAuth.js   4.24

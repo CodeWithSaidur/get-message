@@ -5,14 +5,14 @@ import { ApiResponse } from '@/types/ApiResponse'
 export async function sendVerificationEmail(
   email: string,
   username: string,
-  otp: string
+  verifyCode: string
 ): Promise<ApiResponse> {
   try {
     await resend.emails.send({
       from: 'onboarding@resend.dev', // Original Domain Verify
       to: email,
       subject: 'Verification Code',
-      react: EmailTemplate({ username, otp })
+      react: EmailTemplate({ username, verifyCode })
     })
 
     return {

@@ -2,14 +2,14 @@ import * as React from 'react'
 
 interface EmailTemplateProps {
   username: string
-  otp: string
+  verifyCode: string
 }
 
-export function EmailTemplate({ username, otp }: EmailTemplateProps) {
+export function EmailTemplate({ username, verifyCode }: EmailTemplateProps) {
   return (
     <div>
       <h1>Welcome, {username}!</h1>
-      <span>Your OTP {otp}</span>
+      <span>Your VERIFYCODE {verifyCode}</span>
     </div>
   )
 }
