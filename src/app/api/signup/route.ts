@@ -1,7 +1,7 @@
 import { connectDB } from '@/config/db'
 import { UserModel } from '@/models/User.model'
 import bcrypt from 'bcryptjs'
-import { sendVerificationEmail } from '@/helpers/sendVerificationEmail'
+import { sendVerificationEmail } from '@/lib/resend-smtp'
 
 export async function POST(req: Request) {
   await connectDB()
