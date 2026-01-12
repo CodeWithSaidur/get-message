@@ -9,59 +9,72 @@ export async function POST(req: Request) {
   try {
     const { username, email, password } = await req.json()
 
-    const ExistingUserbyUsername = await UserModel.findOne({
+    // Validate input
+    if (!username || !email || !password) {
+      return Response.json(
+        {
+          success: false,
+          message: 'Missing required fields'
+        },
+        { status: 400 }
+      )
+    }
+
+    // Check if verified user with this username exists
+    const existingUserByUsername = await UserModel.findOne({
       username,
       isVerified: true
     })
 
-    if (ExistingUserbyUsername) {
+    if (existingUserByUsername) {
       return Response.json(
         {
           success: false,
-          message:
-            'Error in Signup in Signup Username is Aldrady Taken route.ts'
+          message: 'Username is already taken'
         },
-        {
-          status: 500
-        }
+        { status: 400 }
       )
     }
+
+    // Generate verification code
     const verificationCode = Math.floor(
       100000 + Math.random() * 900000
     ).toString()
 
-    const ExistingUserbyEmail = await UserModel.findOne({ email })
-    if (ExistingUserbyEmail) {
-      if (ExistingUserbyEmail.isVerified) {
+    // Set expiry to 1 hour from now
+    const expiryDate = new Date()
+    expiryDate.setHours(expiryDate.getHours() + 1)
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    // Check if user with this email exists
+    const existingUserByEmail = await UserModel.findOne({ email })
+
+    if (existingUserByEmail) {
+      if (existingUserByEmail.isVerified) {
         return Response.json(
           {
             success: false,
-            message: 'Error in Signup in Signup Email is Aldrady Taken route.ts'
+            message: 'Email is already registered Change Email'
           },
-          {
-            status: 400
-          }
+          { status: 400 }
         )
       } else {
-        const hasedPassword = await bcrypt.hash(password, 13)
-        ExistingUserbyEmail.password = hasedPassword
-        ExistingUserbyEmail.verificationCode = verificationCode
-        ExistingUserbyEmail.verificationCodeExpiry = new Date(
-          Date.now() + 360000
-        )
+        // Update existing i.e unverified user
+        existingUserByEmail.username = username
+        existingUserByEmail.password = hashedPassword
+        existingUserByEmail.verificationCode = verificationCode
+        existingUserByEmail.verificationCodeExpiry = expiryDate
+        await existingUserByEmail.save()
       }
     } else {
-      const hasedPassword = await bcrypt.hash(password, 13)
-
-      const expiyDate = new Date()
-      expiyDate.setHours(expiyDate.getHours() + 1)
-
+      // Create new user
       const newUser = new UserModel({
         username,
         email,
-        password: hasedPassword,
+        password: hashedPassword,
         verificationCode,
-        verificationCodeExpiry: expiyDate,
+        verificationCodeExpiry: expiryDate,
         isVerified: false,
         isAcceptingMessage: true,
         messages: []
@@ -70,44 +83,35 @@ export async function POST(req: Request) {
       await newUser.save()
     }
 
-    // send Verification Email
-    const emailRes = await sendVerificationEmail(
-      email,
-      username,
-      verificationCode
-    )
-
+    // Send verification email
+    const emailRes = await sendVerificationEmail(email,username,verificationCode)
+    console.log(emailRes);
+    
     if (!emailRes.success) {
       return Response.json(
         {
           success: false,
-          message: 'Error from Respond Email Signup route.ts'
+          message: 'Failed to send verification email'
         },
-        {
-          status: 500
-        }
+        { status: 500 }
       )
     }
 
     return Response.json(
       {
         success: true,
-        message: 'User register Successfully Verify OTP'
+        message: 'User registered successfully. Please verify your email.'
       },
-      {
-        status: 500
-      }
+      { status: 201 }
     )
   } catch (error) {
-    console.error('Error Registering User')
+    console.error('Error registering user:', error)
     return Response.json(
       {
         success: false,
-        message: 'Error in Signup route.ts'
+        message: 'Error registering user'
       },
-      {
-        status: 500
-      }
+      { status: 500 }
     )
   }
 }
