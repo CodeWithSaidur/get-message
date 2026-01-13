@@ -39,8 +39,11 @@ export const authOptions: NextAuthOptions = {
 
           return {
             id: user._id.toString(),
+            _id: user._id.toString(),
             email: user.email,
-            name: user.username
+            username: user.username,
+            isVerified: user.isVerified,
+            isAcceptingMessage: user.isAcceptingMessage
           }
         } catch (error) {
           console.error('Auth error:', error)
@@ -49,10 +52,31 @@ export const authOptions: NextAuthOptions = {
       }
     })
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token._id = user._id?.toString()
+        token.isVerified = user.isVerified
+        token.isAcceptingMessage = user.isAcceptingMessage
+        token.username = user.username
+      }
+      return token
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user._id = token._id as string
+        session.user.isVerified = token.isVerified as boolean
+        session.user.isAcceptingMessage = token.isAcceptingMessage as boolean
+        session.user.username = token.username as string
+      }
+      return session
+    }
+  },
   pages: {
-    signIn: '/auth/signin'
+    signIn: '/signin'
   },
   session: {
     strategy: 'jwt'
-  }
+  },
+  secret: process.env.NEXTAUTH_SECRET
 }
